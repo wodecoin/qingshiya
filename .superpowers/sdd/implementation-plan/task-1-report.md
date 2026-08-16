@@ -78,3 +78,38 @@ files generated: dist/sw.js, dist/workbox-9c191d2f.js
 ### Concerns
 
 无阻塞 concerns。Smoke test 使用 Playwright `request` fixture 验证 webServer 返回应用壳，不启动浏览器页面；当前容器缺少 Chromium 的 `libnspr4.so`，因此未使用浏览器交互断言。
+
+## 限定复审修复追加
+
+将 `test:e2e` 恢复为跨平台的 `playwright test`。Playwright 配置现在使用 `npm run dev -- --host 127.0.0.1`，通过 `webServer.wait.stdout` 等待 Vite 的明确启动输出，避免代理或 IPv6 `localhost` 的 HTTP 就绪探测；配置了 30 秒 timeout 和 `reuseExistingServer: false`，并在配置内处理本地代理变量。`baseURL` 保持为 `http://127.0.0.1:5173`。
+
+### `npm test -- --run`
+
+```text
+Test Files  1 passed (1)
+Tests       1 passed (1)
+```
+
+### `npm run test:e2e`
+
+```text
+[WebServer] > vite --host 127.0.0.1
+[WebServer] ➜  Local:   http://127.0.0.1:5173/
+Running 1 test using 1 worker
+[1/1] [chromium] › e2e/app.spec.ts:3:1 › serves the app shell
+1 passed (2.5s)
+```
+
+### `npm run build`
+
+```text
+✓ 29 modules transformed.
+✓ built in 2.31s
+PWA v1.3.0
+precache  5 entries (193.12 KiB)
+files generated: dist/sw.js, dist/workbox-9c191d2f.js
+```
+
+### Concerns
+
+无阻塞 concerns。当前 E2E 仅为 Playwright `request` smoke test；容器缺少 Chromium 所需的 `libnspr4.so`，因此明确不具备浏览器交互覆盖。
