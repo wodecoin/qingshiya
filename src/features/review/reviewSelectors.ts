@@ -10,7 +10,8 @@ function localDayStart(date: Date): Date {
 }
 
 export function selectWindowEntries(entries: StressEntry[], days: 7 | 30, now = new Date()): StressEntry[] {
-  const end = new Date(localDayStart(now).getTime() + 24 * 60 * 60 * 1000)
+  const end = localDayStart(now)
+  end.setDate(end.getDate() + 1)
   const start = new Date(end)
   start.setDate(start.getDate() - days)
   return entries.filter((entry) => {

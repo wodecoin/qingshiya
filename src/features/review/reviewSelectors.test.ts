@@ -24,6 +24,22 @@ describe('review selectors', () => {
     expect(selectWindowEntries(entries, 30, new Date('2026-08-17T12:00:00.000Z')).map(({ id }) => id)).toEqual(['today', 'old'])
   })
 
+  it('ends at the next local calendar day across a daylight-saving transition', () => {
+    const runtime = globalThis as typeof globalThis & { process?: { env: Record<string, string | undefined> } }
+    const previousTimeZone = runtime.process?.env.TZ
+    if (runtime.process) runtime.process.env.TZ = 'America/New_York'
+    try {
+      const entries = [
+        entry({ id: 'today', createdAt: '2026-03-08T23:59:00-04:00' }),
+        entry({ id: 'tomorrow', createdAt: '2026-03-09T00:30:00-04:00' }),
+      ]
+
+      expect(selectWindowEntries(entries, 7, new Date(2026, 2, 8, 12))).toEqual([entries[0]])
+    } finally {
+      if (runtime.process) runtime.process.env.TZ = previousTimeZone
+    }
+  })
+
   it('returns empty counts for empty data and keeps four tag groups separate', () => {
     expect(countTags([])).toEqual({ primaryEmotions: {}, secondaryReactions: {}, bodySignals: {}, behaviorUrges: {} })
     expect(countTags([entry({ primaryEmotions: ['紧张'], secondaryReactions: ['担心', '担心'], bodySignals: [], behaviorUrges: ['逃避'] })])).toEqual({
