@@ -1,4 +1,5 @@
 import type { StressEntry } from '../../domain/types'
+import { exercises } from '../../content/exercises'
 
 export type TagGroup = 'primaryEmotions' | 'secondaryReactions' | 'bodySignals' | 'behaviorUrges'
 export type TagCounts = Record<TagGroup, Record<string, number>>
@@ -35,6 +36,10 @@ export function countExercises(entries: StressEntry[]): Record<string, number> {
     if (entry.exerciseId) counts[entry.exerciseId] = (counts[entry.exerciseId] ?? 0) + 1
     return counts
   }, {})
+}
+
+export function exerciseTitle(id: string): string {
+  return exercises.find((exercise) => exercise.id === id)?.title ?? `未知练习（${id}）`
 }
 
 export function averageChangeByExercise(entries: StressEntry[]): Record<string, number> {

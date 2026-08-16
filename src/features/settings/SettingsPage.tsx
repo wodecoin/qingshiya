@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { clearAllData } from '../../storage/db'
 import { exportEntries } from './exportActions'
 
-export function SettingsPage() {
+interface SettingsPageProps { onCleared?: () => void }
+
+export function SettingsPage({ onCleared }: SettingsPageProps) {
   const [confirming, setConfirming] = useState(false)
   const [status, setStatus] = useState('')
 
@@ -16,9 +18,14 @@ export function SettingsPage() {
   }
 
   async function clearData() {
-    await clearAllData()
-    setConfirming(false)
-    setStatus('本机记录已清除')
+    try {
+      await clearAllData()
+      setConfirming(false)
+      setStatus('本机记录已清除')
+      onCleared?.()
+    } catch (error) {
+      setStatus(error instanceof Error ? `清除失败：${error.message}` : '清除失败，请稍后重试')
+    }
   }
 
   return <main className="app-content settings-page">
@@ -38,6 +45,6 @@ export function SettingsPage() {
       <p>清除全部记录后不可恢复，请先确认你已经导出需要保留的内容。</p>
       {!confirming ? <button type="button" onClick={() => setConfirming(true)}>清除全部数据</button> : <div role="alertdialog" aria-labelledby="clear-confirm-title"><h3 id="clear-confirm-title">确定清除全部数据？</h3><p>此操作不可恢复。</p><button type="button" onClick={() => void clearData()}>确认清除</button><button type="button" onClick={() => setConfirming(false)}>取消</button></div>}
     </section>
-    {status && <p role="status">{status}</p>}
+    {status && <p role={status.startsWith('清除失败') ? 'alert' : 'status'}>{status}</p>}
   </main>
 }

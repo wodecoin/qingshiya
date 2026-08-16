@@ -5,10 +5,10 @@ import { App } from './App'
 afterEach(cleanup)
 
 describe('App', () => {
-  it('renders the journal entry action', () => {
+  it('renders the journal entry action', async () => {
     render(<App />)
 
-    expect(screen.getByRole('heading', { name: '轻释压' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '轻释压' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '记录一次压力' })).toBeInTheDocument()
     const navigation = screen.getByRole('navigation', { name: '主要导航' })
     expect(navigation).toHaveAttribute('data-mobile-layout', 'fit-five-items')
@@ -38,6 +38,6 @@ describe('App', () => {
     expect(screen.getByRole('alertdialog')).toHaveTextContent('此操作不可恢复')
     fireEvent.click(screen.getByRole('button', { name: '取消' }))
     fireEvent.click(within(screen.getByRole('navigation', { name: '主要导航' })).getByRole('link', { name: '首页' }))
-    expect(screen.getByRole('heading', { name: '轻释压' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '轻释压' })).toBeInTheDocument()
   })
 })

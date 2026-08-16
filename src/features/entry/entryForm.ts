@@ -7,6 +7,7 @@ export interface EntryFormState {
   bodySignals: string[]
   behaviorUrges: string[]
   exerciseId?: string
+  durationMinutes?: number
   intensityAfter?: number
   note?: string
   needsImmediateHelp: boolean
@@ -30,6 +31,7 @@ export function toEntryInput(form: EntryFormState): StressEntryInput {
     bodySignals: form.bodySignals,
     behaviorUrges: form.behaviorUrges,
     ...(form.exerciseId ? { exerciseId: form.exerciseId } : {}),
+    ...(form.durationMinutes === undefined ? {} : { durationMinutes: form.durationMinutes }),
     ...(form.intensityAfter === undefined ? {} : { intensityAfter: form.intensityAfter }),
     ...(form.note?.trim() ? { note: form.note.trim() } : {}),
   }

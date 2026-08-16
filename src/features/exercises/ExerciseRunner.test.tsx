@@ -66,4 +66,15 @@ describe('ExerciseRunner', () => {
     fireEvent.click(screen.getByRole('button', { name: '完成练习' }))
     expect(onComplete).toHaveBeenCalledWith({ durationMinutes: exercise.durationMinutes })
   })
+
+  it('rejects a non-integer post-exercise intensity', () => {
+    const onComplete = vi.fn()
+    render(<ExerciseRunner exercise={exercise} onComplete={onComplete} />)
+
+    fireEvent.change(screen.getByLabelText('练习后强度'), { target: { value: '4.5' } })
+    fireEvent.click(screen.getByRole('button', { name: '完成练习' }))
+
+    expect(onComplete).not.toHaveBeenCalled()
+    expect(screen.getByRole('alert')).toHaveTextContent('1 到 10 的整数')
+  })
 })

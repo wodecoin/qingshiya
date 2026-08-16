@@ -10,6 +10,7 @@ export function ExerciseRunner({ exercise, draft, onComplete, onExit }: Exercise
   const [running, setRunning] = useState(false)
   const [intensityAfter, setIntensityAfter] = useState('')
   const [completedResult, setCompletedResult] = useState<ExerciseResult | undefined>()
+  const [error, setError] = useState('')
 
   useEffect(() => {
     if (!running || remaining <= 0) return
@@ -20,6 +21,14 @@ export function ExerciseRunner({ exercise, draft, onComplete, onExit }: Exercise
   const minutes = Math.floor(remaining / 60)
   const seconds = String(remaining % 60).padStart(2, '0')
   function complete() {
+    if (intensityAfter) {
+      const value = Number(intensityAfter)
+      if (!Number.isInteger(value) || value < 1 || value > 10) {
+        setError('练习后强度必须是 1 到 10 的整数')
+        return
+      }
+    }
+    setError('')
     setRunning(false)
     const result = { durationMinutes: exercise.durationMinutes, ...(intensityAfter ? { intensityAfter: Number(intensityAfter) } : {}) }
     setCompletedResult(result)
@@ -37,7 +46,8 @@ export function ExerciseRunner({ exercise, draft, onComplete, onExit }: Exercise
     <ol>{exercise.instructions.map((instruction) => <li key={instruction}>{instruction}</li>)}</ol>
     <p className="exercise-timer" role="timer" aria-live="off" aria-label="剩余时间">{minutes}:{seconds}</p>
     {exercise.exitInstructions && <p className="exercise-exit">退出方式：{exercise.exitInstructions}</p>}
-    <label>练习后强度（可选）<input aria-label="练习后强度" type="number" min="1" max="10" value={intensityAfter} onChange={(event) => setIntensityAfter(event.target.value)} /></label>
+     <label>练习后强度（可选）<input aria-label="练习后强度" type="number" min="1" max="10" value={intensityAfter} onChange={(event) => setIntensityAfter(event.target.value)} /></label>
+     {error && <p role="alert">{error}</p>}
     <div className="exercise-actions"><button type="button" onClick={() => setRunning(true)} disabled={running}>{running ? '进行中' : '开始练习'}</button><button type="button" onClick={() => setRunning(false)} disabled={!running}>暂停</button><button type="button" onClick={() => setRunning(true)} disabled={running}>继续</button><button type="button" onClick={() => onExit?.(draft)}>退出</button><button type="button" onClick={complete}>完成练习</button></div>
   </section>
 }

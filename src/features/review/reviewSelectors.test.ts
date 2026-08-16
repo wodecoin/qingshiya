@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { StressEntry } from '../../domain/types'
-import { averageChangeByExercise, countExercises, countTags, selectTrend, selectWindowEntries } from './reviewSelectors'
+import { averageChangeByExercise, countExercises, countTags, exerciseTitle, selectTrend, selectWindowEntries } from './reviewSelectors'
+import { exercises } from '../../content/exercises'
 
 const entry = (overrides: Partial<StressEntry>): StressEntry => ({
   id: 'entry',
@@ -64,5 +65,10 @@ describe('review selectors', () => {
   it('does not make a trend judgement with fewer than three entries', () => {
     expect(selectTrend([entry({ id: 'one' }), entry({ id: 'two' })])).toEqual({ sampleSize: 2, label: '记录还不够，继续观察' })
     expect(selectTrend([entry({ id: 'one', intensityBefore: 8 }), entry({ id: 'two', intensityBefore: 7 }), entry({ id: 'three', intensityBefore: 5 })])).toEqual({ sampleSize: 3, label: '记录中的变化：压力强度整体下降' })
+  })
+
+  it('maps exercise IDs to readable titles with an unknown fallback', () => {
+    expect(exerciseTitle(exercises[0].id)).toBe('ARC 拆解')
+    expect(exerciseTitle('missing-exercise')).toBe('未知练习（missing-exercise）')
   })
 })

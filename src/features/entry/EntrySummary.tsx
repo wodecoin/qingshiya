@@ -22,6 +22,8 @@ export function EntrySummary({ entry, highIntensity, needsImmediateHelp, onNeeds
         <div><dt>身体信号</dt><dd>{readableValues(entry.bodySignals)}</dd></div>
         <div><dt>行为冲动</dt><dd>{readableValues(entry.behaviorUrges)}</dd></div>
         {entry.intensityAfter !== undefined && <div><dt>练习后强度</dt><dd>{entry.intensityAfter}</dd></div>}
+        {entry.exerciseId && <div><dt>练习</dt><dd>{entry.exerciseId}</dd></div>}
+        {entry.durationMinutes !== undefined && <div><dt>练习时长</dt><dd>{entry.durationMinutes} 分钟</dd></div>}
         {entry.note && <div><dt>备注</dt><dd>{entry.note}</dd></div>}
       </dl>
       {highIntensity && (

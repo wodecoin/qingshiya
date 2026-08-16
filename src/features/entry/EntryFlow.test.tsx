@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { EntryFlow } from './EntryFlow'
+import { exercises } from '../../content/exercises'
 
 describe('EntryFlow', () => {
   afterEach(cleanup)
@@ -112,6 +113,25 @@ describe('EntryFlow', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('保存失败')
     expect(screen.getByRole('heading', { name: '确认这次记录' })).toBeInTheDocument()
+  })
+
+  it('writes a completed exercise result into the same entry instead of creating another record', async () => {
+    const create = vi.fn().mockResolvedValue({ id: 'saved-entry' })
+    const onExerciseSelect = vi.fn()
+    const { rerender } = render(<EntryFlow repository={{ create }} onExerciseSelect={onExerciseSelect} />)
+
+    fireEvent.click(screen.getByRole('button', { name: '5' }))
+    ;[1, 2, 3, 4, 5].forEach(() => fireEvent.click(screen.getByRole('button', { name: '跳过此步' })))
+    fireEvent.click(screen.getAllByRole('button', { name: '开始' })[0])
+    expect(onExerciseSelect).toHaveBeenCalledWith(exercises[0])
+
+    rerender(<EntryFlow repository={{ create }} onExerciseSelect={onExerciseSelect} exerciseResult={{ durationMinutes: 5, intensityAfter: 3 }} />)
+    fireEvent.click(screen.getByRole('button', { name: '下一步' }))
+    fireEvent.click(screen.getByRole('button', { name: '保存记录' }))
+    await screen.findByText('记录已保存')
+
+    expect(create).toHaveBeenCalledTimes(1)
+    expect(create).toHaveBeenCalledWith(expect.objectContaining({ exerciseId: exercises[0].id, durationMinutes: 5, intensityAfter: 3 }))
   })
 
   it('allows saving without blocking when pressure is 9 or 10', async () => {
