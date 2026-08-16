@@ -37,3 +37,17 @@
 - `npm run test:e2e`: **部分执行**，请求型 shell 测试 1 个通过，3 个浏览器测试仍因 `libnspr4.so: cannot open shared object file: No such file or directory` 无法启动 Chromium。
 
 新增键盘记录测试代码已完成真实全流程断言，但受上述浏览器依赖限制，未在本环境执行到页面断言。
+
+## 追加移动导航修复
+
+- 修复 360px 移动端底部导航的宽度回归：移动端改为 `gap: 0`、`.5rem` 水平 padding，链接使用 `flex: 1 1 0` 均分可用空间；每项仍保留 `min-width`/`min-height: 44px`。
+- 640px 以上桌面布局恢复非等分链接和原有导航间距。
+- 导航增加 `data-mobile-layout="fit-five-items"`，`App.test.tsx` 断言该布局契约及五个链接的 44px 触控契约。
+
+## 移动导航验证
+
+- `npm test -- --run`: **通过**，7 个测试文件、30 个测试全部通过。
+- `npm run build`: **通过**，生产 PWA 构建成功。
+- `npm run test:e2e`: **部分执行**，4 个测试中 1 个请求型 shell 测试通过，3 个 Chromium 测试因 `libnspr4.so: cannot open shared object file: No such file or directory` 阻塞。
+
+浏览器依赖限制仍未解决，因此 360px 真实视口交互检查需在安装 NSPR 运行库后重跑；CSS 断点和组件布局契约已覆盖本次回归。

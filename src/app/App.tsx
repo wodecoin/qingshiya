@@ -21,7 +21,7 @@ export function App() {
       {page === 'exercises' && <main className="app-content"><ExerciseLibrary /></main>}
       {page === 'review' && <ReviewPage onBack={() => setPage('home')} />}
       {page === 'settings' && <SettingsPage />}
-      <nav className="bottom-nav" aria-label="主要导航">
+      <nav className="bottom-nav" data-mobile-layout="fit-five-items" aria-label="主要导航">
         {(Object.keys(routeLabels) as AppPage[]).map((route) => <a key={route} className="nav-touch-target" data-min-touch-target="44px" href={`#${route}`} onClick={navigate(route)} aria-current={page === route ? 'page' : undefined}>{routeLabels[route]}</a>)}
       </nav>
     </div>
