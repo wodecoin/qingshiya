@@ -10,9 +10,9 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "vite-plugin-pwa": "^1.0.2",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "vite-plugin-pwa": "^1.0.2"
   },
   "devDependencies": {
     "@playwright/test": "^1.54.2",
@@ -21,6 +21,7 @@
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "@vitejs/plugin-react": "^5.0.2",
+    "fake-indexeddb": "^6.2.5",
     "jsdom": "^26.1.0",
     "typescript": "^5.9.2",
     "vite": "^7.1.3",
