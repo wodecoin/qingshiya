@@ -125,7 +125,7 @@ describe('EntryFlow', () => {
     fireEvent.click(screen.getAllByRole('button', { name: '开始' })[0])
     expect(onExerciseSelect).toHaveBeenCalledWith(exercises[0])
 
-    rerender(<EntryFlow repository={{ create }} onExerciseSelect={onExerciseSelect} exerciseResult={{ durationMinutes: 5, intensityAfter: 3 }} />)
+    rerender(<EntryFlow repository={{ create }} onExerciseSelect={onExerciseSelect} exerciseResult={{ exerciseId: exercises[0].id, durationMinutes: 5, intensityAfter: 3 }} />)
     fireEvent.click(screen.getByRole('button', { name: '下一步' }))
     fireEvent.click(screen.getByRole('button', { name: '保存记录' }))
     await screen.findByText('记录已保存')

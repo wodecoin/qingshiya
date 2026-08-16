@@ -1,8 +1,11 @@
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { App } from './App'
+import { clearAllData } from '../storage/db'
+import { entriesRepository } from '../storage/entriesRepository'
 
 afterEach(cleanup)
+beforeEach(async () => { await clearAllData() })
 
 describe('App', () => {
   it('renders the journal entry action', async () => {
@@ -39,5 +42,59 @@ describe('App', () => {
     fireEvent.click(screen.getByRole('button', { name: '取消' }))
     fireEvent.click(within(screen.getByRole('navigation', { name: '主要导航' })).getByRole('link', { name: '首页' }))
     expect(await screen.findByRole('heading', { name: '轻释压' })).toBeInTheDocument()
+  })
+
+  it('saves one entry with the completed exercise result', async () => {
+    render(<App />)
+    fireEvent.click(await screen.findByRole('button', { name: '跳过' }))
+    fireEvent.click(await screen.findByRole('button', { name: '记录一次压力' }))
+    fireEvent.click(screen.getByRole('button', { name: '5' }))
+    ;[1, 2, 3, 4, 5].forEach(() => fireEvent.click(screen.getByRole('button', { name: '跳过此步' })))
+    fireEvent.click(screen.getAllByRole('button', { name: '开始' })[0])
+    fireEvent.click(screen.getByRole('button', { name: '开始练习' }))
+    fireEvent.click(screen.getByRole('button', { name: '完成练习' }))
+    fireEvent.click(screen.getByRole('button', { name: '下一步' }))
+    fireEvent.click(screen.getByRole('button', { name: '保存记录' }))
+
+    await waitFor(async () => expect(await entriesRepository.list()).toHaveLength(1))
+    const entries = await entriesRepository.list()
+    expect(entries).toHaveLength(1)
+    expect(entries[0]).toMatchObject({ exerciseId: 'arc-breakdown', durationMinutes: 5 })
+  })
+
+  it('saves the pressure draft without an exercise after exiting an unfinished exercise', async () => {
+    render(<App />)
+    fireEvent.click(await screen.findByRole('button', { name: '跳过' }))
+    fireEvent.click(screen.getByRole('button', { name: '记录一次压力' }))
+    fireEvent.click(screen.getByRole('button', { name: '5' }))
+    ;[1, 2, 3, 4, 5].forEach(() => fireEvent.click(screen.getByRole('button', { name: '跳过此步' })))
+    fireEvent.click(screen.getAllByRole('button', { name: '开始' })[0])
+    fireEvent.click(screen.getByRole('button', { name: '退出' }))
+    fireEvent.click(screen.getByRole('button', { name: '下一步' }))
+    fireEvent.click(screen.getByRole('button', { name: '保存记录' }))
+
+    await waitFor(async () => expect(await entriesRepository.list()).toHaveLength(1))
+    const entries = await entriesRepository.list()
+    expect(entries).toHaveLength(1)
+    expect(entries[0].exerciseId).toBeUndefined()
+    expect(entries[0].durationMinutes).toBeUndefined()
+  })
+
+  it('clears the runner and result when leaving and re-entering the entry flow', async () => {
+    render(<App />)
+    fireEvent.click(await screen.findByRole('button', { name: '跳过' }))
+    fireEvent.click(await screen.findByRole('button', { name: '记录一次压力' }))
+    fireEvent.click(screen.getByRole('button', { name: '5' }))
+    ;[1, 2, 3, 4, 5].forEach(() => fireEvent.click(screen.getByRole('button', { name: '跳过此步' })))
+    fireEvent.click(screen.getAllByRole('button', { name: '开始' })[0])
+    fireEvent.click(screen.getByRole('button', { name: '开始练习' }))
+    fireEvent.click(screen.getByRole('button', { name: '完成练习' }))
+    fireEvent.click(within(screen.getByRole('navigation', { name: '主要导航' })).getByRole('link', { name: '首页' }))
+    fireEvent.click(await screen.findByRole('button', { name: '记录一次压力' }))
+    fireEvent.click(screen.getByRole('button', { name: '5' }))
+    ;[1, 2, 3, 4, 5].forEach(() => fireEvent.click(screen.getByRole('button', { name: '跳过此步' })))
+
+    expect(screen.queryByRole('button', { name: '完成练习' })).not.toBeInTheDocument()
+    expect(screen.getByRole('spinbutton', { name: '练习后压力强度' })).toHaveValue(null)
   })
 })

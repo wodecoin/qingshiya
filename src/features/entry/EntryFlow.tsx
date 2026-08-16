@@ -9,7 +9,7 @@ import { EntrySummary } from './EntrySummary'
 import { initialEntryForm, toEntryInput, type EntryFormState } from './entryForm'
 
 interface EntryRepository { create: (input: ReturnType<typeof toEntryInput>) => Promise<unknown> }
-interface ExerciseResult { durationMinutes: number; intensityAfter?: number }
+interface ExerciseResult { exerciseId: string; durationMinutes: number; intensityAfter?: number }
 interface EntryFlowProps {
   repository?: EntryRepository
   onSaved?: () => void
@@ -30,7 +30,7 @@ export function EntryFlow({ repository = entriesRepository, onSaved, onExerciseS
   const highIntensity = form.intensityBefore !== undefined && form.intensityBefore >= 9
 
   useEffect(() => {
-    if (exerciseResult) update({ durationMinutes: exerciseResult.durationMinutes, intensityAfter: exerciseResult.intensityAfter })
+    if (exerciseResult) update({ exerciseId: exerciseResult.exerciseId, durationMinutes: exerciseResult.durationMinutes, intensityAfter: exerciseResult.intensityAfter })
   }, [exerciseResult])
 
   function update(change: Partial<EntryFormState>) { setForm((current) => ({ ...current, ...change })) }
@@ -68,7 +68,7 @@ export function EntryFlow({ repository = entriesRepository, onSaved, onExerciseS
       {step === 'secondary' && <><h2 id="entry-flow-title">还有哪些叠加反应？</h2>{picker}</>}
       {step === 'body' && <><h2 id="entry-flow-title">身体有什么信号？</h2>{picker}</>}
       {step === 'behavior' && <><h2 id="entry-flow-title">此刻有什么行为冲动？</h2>{picker}</>}
-       {step === 'exercise' && <><h2 id="entry-flow-title">选择练习（可选）</h2><ExerciseLibrary onSelect={(exercise) => { update({ exerciseId: exercise.id }); onExerciseSelect?.(exercise) }} /><label className="field-label" htmlFor="entry-intensity-after">练习后压力强度</label><input className="number-input" id="entry-intensity-after" aria-label="练习后压力强度" type="number" min="1" max="10" value={form.intensityAfter ?? ''} onChange={(event) => update({ intensityAfter: event.target.value ? Number(event.target.value) : undefined })} /></>}
+       {step === 'exercise' && <><h2 id="entry-flow-title">选择练习（可选）</h2><ExerciseLibrary onSelect={(exercise) => onExerciseSelect?.(exercise)} /><label className="field-label" htmlFor="entry-intensity-after">练习后压力强度</label><input className="number-input" id="entry-intensity-after" aria-label="练习后压力强度" type="number" min="1" max="10" value={form.intensityAfter ?? ''} onChange={(event) => update({ intensityAfter: event.target.value ? Number(event.target.value) : undefined })} /></>}
       <footer className="entry-actions">
         <button type="button" onClick={() => setStepIndex(Math.max(0, stepIndex - 1))} disabled={stepIndex === 0}>上一步</button>
         <button type="button" onClick={() => setStepIndex(stepIndex + 1)}>跳过此步</button>
