@@ -28,4 +28,4 @@ Implemented navigation, settings, export, local data clearing, privacy copy, and
 
 ## Commit
 
-Pending.
+`6946a50` (`feat: connect app navigation and offline settings`)
