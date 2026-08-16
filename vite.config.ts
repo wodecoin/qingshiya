@@ -5,7 +5,19 @@ import { VitePWA } from 'vite-plugin-pwa'
 export default defineConfig({
   plugins: [
     react(),
-    VitePWA({ registerType: 'autoUpdate' }),
+    VitePWA({
+      registerType: 'autoUpdate',
+      devOptions: { enabled: true },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        navigateFallback: '/index.html',
+        runtimeCaching: [{
+          urlPattern: ({ request }) => request.destination === 'document' || request.destination === 'script' || request.destination === 'style',
+          handler: 'NetworkFirst',
+          options: { cacheName: 'qingshiya-app-shell', networkTimeoutSeconds: 3 },
+        }],
+      },
+    }),
   ],
   test: {
     include: ['src/**/*.{test,spec}.{ts,tsx}'],

@@ -3,6 +3,18 @@ export const DATABASE_VERSION = 1
 export const ENTRIES_STORE = 'entries'
 export const SETTINGS_STORE = 'settings'
 
+export async function clearAllData(): Promise<void> {
+  const database = await openDatabase()
+  try {
+    const transaction = database.transaction([ENTRIES_STORE, SETTINGS_STORE], 'readwrite')
+    transaction.objectStore(ENTRIES_STORE).clear()
+    transaction.objectStore(SETTINGS_STORE).clear()
+    await transactionToPromise(transaction)
+  } finally {
+    database.close()
+  }
+}
+
 export function openDatabase(indexedDBFactory: IDBFactory = globalThis.indexedDB): Promise<IDBDatabase> {
   if (!indexedDBFactory) {
     return Promise.reject(new Error('IndexedDB is unavailable in this environment'))
