@@ -17,6 +17,7 @@ export function EntryFlow({ repository = entriesRepository, onSaved }: EntryFlow
   const [form, setForm] = useState<EntryFormState>(initialEntryForm)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState('')
   const step: Step | 'summary' = stepIndex >= steps.length ? 'summary' : steps[stepIndex]
   const highIntensity = form.intensityBefore !== undefined && form.intensityBefore >= 9
 
@@ -24,10 +25,13 @@ export function EntryFlow({ repository = entriesRepository, onSaved }: EntryFlow
 
   async function save() {
     setSaving(true)
+    setSaveError('')
     try {
       await repository.create(toEntryInput(form))
       setSaved(true)
       onSaved?.()
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : '暂时无法保存，请稍后再试')
     } finally { setSaving(false) }
   }
 
@@ -57,7 +61,9 @@ export function EntryFlow({ repository = entriesRepository, onSaved }: EntryFlow
         <button type="button" onClick={() => setStepIndex(Math.max(0, stepIndex - 1))} disabled={stepIndex === 0}>上一步</button>
         <button type="button" onClick={() => setStepIndex(stepIndex + 1)}>跳过此步</button>
         <button type="button" onClick={() => setStepIndex(stepIndex + 1)}>下一步</button>
+        <button type="button" onClick={save} disabled={saving}>保存</button>
       </footer>
+      {saveError && <p role="alert">{saveError}</p>}
     </section>
   )
 }

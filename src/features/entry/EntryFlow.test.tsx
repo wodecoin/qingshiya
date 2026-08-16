@@ -73,4 +73,44 @@ describe('EntryFlow', () => {
     expect(screen.getByRole('button', { name: '恐惧' })).toHaveAttribute('aria-pressed', 'true')
     expect(screen.getByRole('button', { name: '愤怒' })).toHaveAttribute('aria-pressed', 'false')
   })
+
+  it('rejects a fourth secondary reaction while retaining the first three', () => {
+    render(<EntryFlow repository={{ create: vi.fn() }} />)
+
+    fireEvent.click(screen.getByRole('button', { name: '5' }))
+    fireEvent.click(screen.getByRole('button', { name: '下一步' }))
+    fireEvent.click(screen.getByRole('button', { name: '跳过此步' }))
+    ;['自责', '麻木', '逃避', '反复思考'].forEach((label) => fireEvent.click(screen.getByRole('button', { name: label })))
+
+    expect(screen.getByText('最多选择 3 项')).toBeInTheDocument()
+    ;['自责', '麻木', '逃避'].forEach((label) => expect(screen.getByRole('button', { name: label })).toHaveAttribute('aria-pressed', 'true'))
+    expect(screen.getByRole('button', { name: '反复思考' })).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('saves the post-exercise intensity after skipping exercise selection', async () => {
+    const create = vi.fn().mockResolvedValue({ id: 'saved-entry' })
+    render(<EntryFlow repository={{ create }} />)
+
+    fireEvent.click(screen.getByRole('button', { name: '5' }))
+    ;[1, 2, 3, 4, 5].forEach(() => fireEvent.click(screen.getByRole('button', { name: '跳过此步' })))
+    fireEvent.change(screen.getByRole('spinbutton', { name: '练习后压力强度' }), { target: { value: '3' } })
+    fireEvent.click(screen.getByRole('button', { name: '下一步' }))
+    fireEvent.click(screen.getByRole('button', { name: '保存记录' }))
+    await screen.findByText('记录已保存')
+
+    expect(create).toHaveBeenCalledWith(expect.objectContaining({ intensityBefore: 5, intensityAfter: 3 }))
+  })
+
+  it('allows saving without blocking when pressure is 9 or 10', async () => {
+    for (const intensity of [9, 10]) {
+      const create = vi.fn().mockResolvedValue({ id: `saved-${intensity}` })
+      render(<EntryFlow repository={{ create }} />)
+      fireEvent.click(screen.getByRole('button', { name: String(intensity) }))
+      expect(screen.getByText('压力很高，但你仍然可以按自己的节奏记录。')).toBeInTheDocument()
+      fireEvent.click(screen.getByRole('button', { name: '保存' }))
+      await screen.findByText('记录已保存')
+      expect(create).toHaveBeenCalledWith(expect.objectContaining({ intensityBefore: intensity }))
+      cleanup()
+    }
+  })
 })

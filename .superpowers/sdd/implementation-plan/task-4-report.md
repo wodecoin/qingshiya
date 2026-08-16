@@ -25,3 +25,23 @@
 
 - The new `EntryFlow` is not wired into `App`; this task brief only specified creating the feature files and tests, so app-shell integration remains a later task.
 - The optional exercise step stores post-exercise intensity but does not select an exercise because Task 3 did not provide an exercise dictionary or exercise-selection interface.
+
+## Review Fixes
+
+- Added a callable `保存` action to every step footer. Existing `上一步`, `跳过此步`, and `下一步` actions remain available.
+- Added a regression test proving the fourth secondary reaction is rejected while the first three remain selected.
+- Added a regression test proving the optional exercise-selection path can be skipped while `intensityAfter` is saved.
+- Added regression coverage proving levels 9 and 10 show a non-blocking prompt and still save.
+- Save validation errors now render as an inline alert instead of escaping from the form.
+
+## Review-Fix Verification
+
+- Targeted: `npm test -- --run src/features/entry/EntryFlow.test.tsx`
+  - 1 test file passed
+  - 6 tests passed
+- Full: `npm test -- --run`
+  - 4 test files passed
+  - 17 tests passed
+- Build: `npm run build`
+  - TypeScript compilation passed
+  - Vite production build passed
