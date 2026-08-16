@@ -35,7 +35,7 @@ export function ExerciseRunner({ exercise, draft, onComplete, onExit }: Exercise
     <h2 id="exercise-runner-title">{exercise.title}</h2>
     {exercise.applicableSituations && <p>适用情境：{exercise.applicableSituations.join('；')}</p>}
     <ol>{exercise.instructions.map((instruction) => <li key={instruction}>{instruction}</li>)}</ol>
-    <p className="exercise-timer" aria-label="剩余时间">{minutes}:{seconds}</p>
+    <p className="exercise-timer" role="timer" aria-live="off" aria-label="剩余时间">{minutes}:{seconds}</p>
     {exercise.exitInstructions && <p className="exercise-exit">退出方式：{exercise.exitInstructions}</p>}
     <label>练习后强度（可选）<input aria-label="练习后强度" type="number" min="1" max="10" value={intensityAfter} onChange={(event) => setIntensityAfter(event.target.value)} /></label>
     <div className="exercise-actions"><button type="button" onClick={() => setRunning(true)} disabled={running}>{running ? '进行中' : '开始练习'}</button><button type="button" onClick={() => setRunning(false)} disabled={!running}>暂停</button><button type="button" onClick={() => setRunning(true)} disabled={running}>继续</button><button type="button" onClick={() => onExit?.(draft)}>退出</button><button type="button" onClick={complete}>完成练习</button></div>

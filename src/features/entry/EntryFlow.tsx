@@ -50,14 +50,14 @@ export function EntryFlow({ repository = entriesRepository, onSaved }: EntryFlow
 
   return (
     <section aria-labelledby="entry-flow-title">
-      <p>第 {stepIndex + 1} 步，共 {steps.length} 步</p>
-      {step === 'intensity' && <><h2 id="entry-flow-title">此刻的压力有多强？</h2><div role="group" aria-label="压力强度" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>{Array.from({ length: 10 }, (_, index) => index + 1).map((value) => <button key={value} type="button" aria-pressed={form.intensityBefore === value} onClick={() => update({ intensityBefore: value })}>{value}</button>)}</div>{highIntensity && <p role="note">压力很高，但你仍然可以按自己的节奏记录。</p>}</>}
+      <p className="entry-progress">第 {stepIndex + 1} 步，共 {steps.length} 步</p>
+      {step === 'intensity' && <><h2 id="entry-flow-title">此刻的压力有多强？</h2><div className="choice-grid" role="group" aria-label="压力强度">{Array.from({ length: 10 }, (_, index) => index + 1).map((value) => <button className="choice-button" key={value} type="button" aria-pressed={form.intensityBefore === value} onClick={() => update({ intensityBefore: value })}>{value}</button>)}</div>{highIntensity && <p role="note">压力很高，但你仍然可以按自己的节奏记录。</p>}</>}
       {step === 'primary' && <><h2 id="entry-flow-title">最贴近的原初情绪</h2>{picker}</>}
       {step === 'secondary' && <><h2 id="entry-flow-title">还有哪些叠加反应？</h2>{picker}</>}
       {step === 'body' && <><h2 id="entry-flow-title">身体有什么信号？</h2>{picker}</>}
       {step === 'behavior' && <><h2 id="entry-flow-title">此刻有什么行为冲动？</h2>{picker}</>}
-      {step === 'exercise' && <><h2 id="entry-flow-title">练习后压力有多强？（可选）</h2><input aria-label="练习后压力强度" type="number" min="1" max="10" value={form.intensityAfter ?? ''} onChange={(event) => update({ intensityAfter: event.target.value ? Number(event.target.value) : undefined })} /></>}
-      <footer style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+      {step === 'exercise' && <><h2 id="entry-flow-title">练习后压力有多强？（可选）</h2><label className="field-label" htmlFor="entry-intensity-after">练习后压力强度</label><input className="number-input" id="entry-intensity-after" aria-label="练习后压力强度" type="number" min="1" max="10" value={form.intensityAfter ?? ''} onChange={(event) => update({ intensityAfter: event.target.value ? Number(event.target.value) : undefined })} /></>}
+      <footer className="entry-actions">
         <button type="button" onClick={() => setStepIndex(Math.max(0, stepIndex - 1))} disabled={stepIndex === 0}>上一步</button>
         <button type="button" onClick={() => setStepIndex(stepIndex + 1)}>跳过此步</button>
         <button type="button" onClick={() => setStepIndex(stepIndex + 1)}>下一步</button>

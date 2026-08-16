@@ -26,14 +26,14 @@ export function EmotionPicker({ options, selected, maxSelections, onChange }: Em
 
   return (
     <div>
-      <div role="group" aria-label="选项" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+      <div className="choice-grid choice-grid--tags" role="group" aria-label="选项">
         {options.map((option) => (
           <button
             key={option}
             type="button"
             aria-pressed={selected.includes(option)}
             onClick={() => toggle(option)}
-            style={{ padding: '0.65rem 0.9rem', borderRadius: '999px' }}
+            className="choice-button choice-button--tag"
           >
             {option}
           </button>
