@@ -8,9 +8,10 @@ interface EntrySummaryProps {
   onNeedsImmediateHelpChange: (value: boolean) => void
   onSave: () => void
   saving?: boolean
+  saveError?: string
 }
 
-export function EntrySummary({ entry, highIntensity, needsImmediateHelp, onNeedsImmediateHelpChange, onSave, saving = false }: EntrySummaryProps) {
+export function EntrySummary({ entry, highIntensity, needsImmediateHelp, onNeedsImmediateHelpChange, onSave, saving = false, saveError }: EntrySummaryProps) {
   return (
     <section aria-labelledby="entry-summary-title">
       <h2 id="entry-summary-title">确认这次记录</h2>
@@ -35,6 +36,7 @@ export function EntrySummary({ entry, highIntensity, needsImmediateHelp, onNeeds
       <button type="button" className="primary-action" onClick={onSave} disabled={saving}>
         {saving ? '保存中…' : '保存记录'}
       </button>
+      {saveError && <p role="alert">{saveError}</p>}
     </section>
   )
 }

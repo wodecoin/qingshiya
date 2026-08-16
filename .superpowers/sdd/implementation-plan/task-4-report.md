@@ -21,6 +21,23 @@
   - TypeScript compilation passed
   - Vite production build passed
 
+## Limited Review Fixes
+
+- Added an explicit save test for skipping exercise selection: `repository.create` is called with `intensityAfter`, and the captured input has `exerciseId === undefined`.
+- Passed `saveError` into `EntrySummary` and rendered it as an inline `role="alert"` while keeping the summary visible after a failed save.
+
+## Limited-Review Verification
+
+- Targeted: `npm test -- --run src/features/entry/EntryFlow.test.tsx`
+  - 1 test file passed
+  - 7 tests passed
+- Full: `npm test -- --run`
+  - 4 test files passed
+  - 18 tests passed
+- Build: `npm run build`
+  - TypeScript compilation passed
+  - Vite production build passed
+
 ## Concerns
 
 - The new `EntryFlow` is not wired into `App`; this task brief only specified creating the feature files and tests, so app-shell integration remains a later task.

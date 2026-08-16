@@ -87,7 +87,7 @@ describe('EntryFlow', () => {
     expect(screen.getByRole('button', { name: '反复思考' })).toHaveAttribute('aria-pressed', 'false')
   })
 
-  it('saves the post-exercise intensity after skipping exercise selection', async () => {
+  it('saves without an exerciseId when exercise selection is skipped', async () => {
     const create = vi.fn().mockResolvedValue({ id: 'saved-entry' })
     render(<EntryFlow repository={{ create }} />)
 
@@ -99,6 +99,19 @@ describe('EntryFlow', () => {
     await screen.findByText('记录已保存')
 
     expect(create).toHaveBeenCalledWith(expect.objectContaining({ intensityBefore: 5, intensityAfter: 3 }))
+    expect(create.mock.calls[0][0].exerciseId).toBeUndefined()
+  })
+
+  it('shows a summary save error inline when repository.create fails', async () => {
+    const create = vi.fn().mockRejectedValue(new Error('保存失败'))
+    render(<EntryFlow repository={{ create }} />)
+
+    fireEvent.click(screen.getByRole('button', { name: '5' }))
+    ;[1, 2, 3, 4, 5, 6].forEach(() => fireEvent.click(screen.getByRole('button', { name: '跳过此步' })))
+    fireEvent.click(screen.getByRole('button', { name: '保存记录' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('保存失败')
+    expect(screen.getByRole('heading', { name: '确认这次记录' })).toBeInTheDocument()
   })
 
   it('allows saving without blocking when pressure is 9 or 10', async () => {

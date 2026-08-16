@@ -37,7 +37,7 @@ export function EntryFlow({ repository = entriesRepository, onSaved }: EntryFlow
 
   if (saved) return <p role="status">记录已保存</p>
   if (step === 'summary') {
-    return <EntrySummary entry={toEntryInput(form)} highIntensity={highIntensity} needsImmediateHelp={form.needsImmediateHelp} onNeedsImmediateHelpChange={(value) => update({ needsImmediateHelp: value })} onSave={save} saving={saving} />
+    return <EntrySummary entry={toEntryInput(form)} highIntensity={highIntensity} needsImmediateHelp={form.needsImmediateHelp} onNeedsImmediateHelpChange={(value) => update({ needsImmediateHelp: value })} onSave={save} saving={saving} saveError={saveError} />
   }
 
   const picker = step === 'primary'
