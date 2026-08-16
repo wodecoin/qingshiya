@@ -22,7 +22,7 @@ export function App() {
       {page === 'review' && <ReviewPage onBack={() => setPage('home')} />}
       {page === 'settings' && <SettingsPage />}
       <nav className="bottom-nav" aria-label="主要导航">
-        {(Object.keys(routeLabels) as AppPage[]).map((route) => <a key={route} href={`#${route}`} onClick={navigate(route)} aria-current={page === route ? 'page' : undefined}>{routeLabels[route]}</a>)}
+        {(Object.keys(routeLabels) as AppPage[]).map((route) => <a key={route} className="nav-touch-target" data-min-touch-target="44px" href={`#${route}`} onClick={navigate(route)} aria-current={page === route ? 'page' : undefined}>{routeLabels[route]}</a>)}
       </nav>
     </div>
   )

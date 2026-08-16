@@ -23,3 +23,17 @@
 - 当前环境缺少 `libnspr4.so`，需要安装系统 NSPR 运行库后重新运行完整 E2E。
 - 360/768/1440 的布局检查已通过 CSS 断点和溢出规则静态审查，但由于同一浏览器依赖缺失，无法在真实浏览器视口中完成截图或交互式验收。
 - E2E 未引入 axe 等专用扫描器；本次自动化覆盖了需求指定的控件命名、表单标签、键盘和焦点行为。
+
+## 追加修复
+
+- 增加欢迎卡片的低刺激渐入和装饰云朵的缓慢呼吸动画；`prefers-reduced-motion: reduce` 现在明确关闭全部 `animation` 和 `transition`。
+- 将无障碍 E2E 改为通过焦点与 Enter 完成强度、四类体验选择、跳过可选练习，并实际保存；断言返回首页且记录数量出现。
+- 底部导航链接增加 `min-width`/`min-height: 44px`、padding 和 `data-min-touch-target="44px"`；`App.test.tsx` 断言所有导航链接具备该触控目标契约。
+
+## 追加验证
+
+- `npm test -- --run`: **通过**，7 个测试文件、30 个测试全部通过。
+- `npm run build`: **通过**，TypeScript 检查和生产 PWA 构建成功。
+- `npm run test:e2e`: **部分执行**，请求型 shell 测试 1 个通过，3 个浏览器测试仍因 `libnspr4.so: cannot open shared object file: No such file or directory` 无法启动 Chromium。
+
+新增键盘记录测试代码已完成真实全流程断言，但受上述浏览器依赖限制，未在本环境执行到页面断言。

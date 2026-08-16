@@ -10,6 +10,9 @@ describe('App', () => {
 
     expect(screen.getByRole('heading', { name: '轻释压' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '记录一次压力' })).toBeInTheDocument()
+    for (const link of screen.getAllByRole('link')) {
+      expect(link).toHaveAttribute('data-min-touch-target', '44px')
+    }
   })
 
   it('navigates to all five app destinations', async () => {

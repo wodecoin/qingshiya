@@ -8,13 +8,27 @@ test('entry flow exposes named controls and supports keyboard completion', async
   await expect(page.getByRole('group', { name: '压力强度' })).toBeVisible()
   await expect(page.getByRole('button', { name: '下一步' })).toBeVisible()
 
-  await page.getByRole('button', { name: '5', exact: true }).click()
-  await page.getByRole('button', { name: '下一步', exact: true }).focus()
-  await page.keyboard.press('Enter')
-  await expect(page.getByRole('heading', { name: '最贴近的原初情绪' })).toBeVisible()
+  const activate = async (name: string, exact = true) => {
+    const control = page.getByRole('button', { name, exact }).first()
+    await control.focus()
+    await page.keyboard.press('Enter')
+  }
 
-  await page.getByRole('button', { name: '保存', exact: true }).focus()
-  await expect(page.getByRole('button', { name: '保存', exact: true })).toBeFocused()
+  await activate('5')
+  await activate('下一步')
+  await activate('喜悦', false)
+  await activate('下一步')
+  await activate('担心', false)
+  await activate('下一步')
+  await activate('心跳加快', false)
+  await activate('下一步')
+  await activate('逃避', false)
+  await activate('下一步')
+  await activate('跳过此步')
+  await expect(page.getByRole('heading', { name: '确认这次记录' })).toBeVisible()
+  await activate('保存记录')
+  await expect(page.getByRole('heading', { name: '轻释压' })).toBeVisible()
+  await expect(page.getByText(/已有 \d+ 次记录/)).toBeVisible()
 })
 
 test('exercise timer updates without taking focus from the user', async ({ page }) => {
