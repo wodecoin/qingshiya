@@ -29,6 +29,8 @@ export interface Exercise {
   durationMinutes: number
   instructions: string[]
   sourceChapter: string
+  applicableSituations?: string[]
+  exitInstructions?: string
 }
 
 export interface Settings {
