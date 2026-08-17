@@ -2,13 +2,16 @@ import { useEffect, useState } from 'react'
 import { behaviorUrgeOptions, bodySignalOptions, primaryEmotionOptions, secondaryReactionOptions } from '../../domain/emotionDictionary'
 import { MAX_PRIMARY_EMOTIONS, MAX_SECONDARY_REACTIONS } from '../../domain/types'
 import { entriesRepository } from '../../storage/entriesRepository'
-import type { Exercise } from '../../domain/types'
+import type { Exercise, StressEntry } from '../../domain/types'
 import { ExerciseLibrary } from '../exercises/ExerciseLibrary'
 import { EmotionPicker } from './EmotionPicker'
 import { EntrySummary } from './EntrySummary'
 import { initialEntryForm, toEntryInput, type EntryFormState } from './entryForm'
 
-interface EntryRepository { create: (input: ReturnType<typeof toEntryInput>) => Promise<unknown> }
+interface EntryRepository {
+  create: (input: ReturnType<typeof toEntryInput>) => Promise<StressEntry>
+  update: (entry: StressEntry) => Promise<StressEntry>
+}
 interface ExerciseResult { exerciseId: string; durationMinutes: number; intensityAfter?: number }
 interface EntryFlowProps {
   repository?: EntryRepository
@@ -44,12 +47,33 @@ export function EntryFlow({ repository = entriesRepository, onSaved, onExerciseS
     setSaving(true)
     setSaveError('')
     try {
-      await repository.create(toEntryInput(form))
+      const input = toEntryInput(form)
+      if (form.id && form.createdAt) {
+        await repository.update({ ...input, id: form.id, createdAt: form.createdAt })
+      } else {
+        await repository.create(input)
+      }
       setSaved(true)
       onSaved?.()
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : '暂时无法保存，请稍后再试')
     } finally { setSaving(false) }
+  }
+
+  async function advance() {
+    if (step === 'behavior' && !form.id) {
+      setSaving(true)
+      setSaveError('')
+      try {
+        const entry = await repository.create(toEntryInput(form))
+        update({ id: entry.id, createdAt: entry.createdAt })
+        setStepIndex(stepIndex + 1)
+      } catch (error) {
+        setSaveError(error instanceof Error ? error.message : '暂时无法保存，请稍后再试')
+      } finally { setSaving(false) }
+      return
+    }
+    setStepIndex(stepIndex + 1)
   }
 
   if (saved) return <p role="status">记录已保存</p>
@@ -77,7 +101,7 @@ export function EntryFlow({ repository = entriesRepository, onSaved, onExerciseS
       <footer className="entry-actions">
         <button type="button" onClick={() => setStepIndex(Math.max(0, stepIndex - 1))} disabled={stepIndex === 0}>上一步</button>
         <button type="button" onClick={() => setStepIndex(stepIndex + 1)}>跳过此步</button>
-        <button type="button" onClick={() => setStepIndex(stepIndex + 1)}>下一步</button>
+        <button type="button" onClick={advance} disabled={saving}>下一步</button>
         <button type="button" onClick={save} disabled={saving}>保存</button>
       </footer>
       {saveError && <p role="alert">{saveError}</p>}

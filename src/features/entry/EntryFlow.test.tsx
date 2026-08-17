@@ -6,9 +6,25 @@ import { exercises } from '../../content/exercises'
 describe('EntryFlow', () => {
   afterEach(cleanup)
 
+  it('creates a draft when advancing from behavior with the current entry', () => {
+    const create = vi.fn().mockResolvedValue({ id: 'draft-entry', createdAt: '2026-08-17T00:00:00.000Z' })
+    render(<EntryFlow repository={{ create, update: vi.fn() }} />)
+
+    fireEvent.click(screen.getByRole('button', { name: '6' }))
+    ;[1, 2, 3, 4].forEach(() => fireEvent.click(screen.getByRole('button', { name: '跳过此步' })))
+    fireEvent.click(screen.getByRole('button', { name: '回避任务' }))
+    fireEvent.click(screen.getByRole('button', { name: '下一步' }))
+
+    expect(create).toHaveBeenCalledWith(expect.objectContaining({
+      intensityBefore: 6,
+      behaviorUrges: ['回避任务'],
+    }))
+  })
+
   it('saves a complete entry after stepping through each decision group', async () => {
-    const create = vi.fn().mockResolvedValue({ id: 'saved-entry' })
-    render(<EntryFlow repository={{ create }} />)
+    const create = vi.fn().mockResolvedValue({ id: 'saved-entry', createdAt: '2026-08-17T00:00:00.000Z' })
+    const update = vi.fn().mockResolvedValue(undefined)
+    render(<EntryFlow repository={{ create, update }} />)
 
     fireEvent.click(screen.getByRole('button', { name: '8' }))
     fireEvent.click(screen.getByRole('button', { name: '下一步' }))
@@ -21,6 +37,7 @@ describe('EntryFlow', () => {
     fireEvent.click(screen.getByRole('button', { name: '下一步' }))
     fireEvent.click(screen.getByRole('button', { name: '回避任务' }))
     fireEvent.click(screen.getByRole('button', { name: '下一步' }))
+    await screen.findByRole('heading', { name: '选择练习（可选）' })
     fireEvent.click(screen.getByRole('button', { name: '跳过此步' }))
 
     expect(screen.getByRole('heading', { name: '确认这次记录' })).toBeInTheDocument()
@@ -29,7 +46,7 @@ describe('EntryFlow', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '保存记录' }))
     await screen.findByText('记录已保存')
-    expect(create).toHaveBeenCalledWith(expect.objectContaining({
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({
       intensityBefore: 8,
       primaryEmotions: ['焦虑', '恐惧'],
       secondaryReactions: ['反复思考'],
@@ -39,8 +56,8 @@ describe('EntryFlow', () => {
   })
 
   it('supports skipping optional steps and returning without losing selections', () => {
-    const create = vi.fn().mockResolvedValue({ id: 'saved-entry' })
-    render(<EntryFlow repository={{ create }} />)
+    const create = vi.fn().mockResolvedValue({ id: 'saved-entry', createdAt: '2026-08-17T00:00:00.000Z' })
+    render(<EntryFlow repository={{ create, update: vi.fn() }} />)
 
     fireEvent.click(screen.getByRole('button', { name: '9' }))
     expect(screen.getByText('压力很高，但你仍然可以按自己的节奏记录。')).toBeInTheDocument()
@@ -63,7 +80,7 @@ describe('EntryFlow', () => {
   })
 
   it('keeps existing choices and shows a prompt when a selection limit is exceeded', () => {
-    render(<EntryFlow repository={{ create: vi.fn() }} />)
+    render(<EntryFlow repository={{ create: vi.fn(), update: vi.fn() }} />)
 
     fireEvent.click(screen.getByRole('button', { name: '5' }))
     fireEvent.click(screen.getByRole('button', { name: '下一步' }))
@@ -76,7 +93,7 @@ describe('EntryFlow', () => {
   })
 
   it('rejects a fourth secondary reaction while retaining the first three', () => {
-    render(<EntryFlow repository={{ create: vi.fn() }} />)
+    render(<EntryFlow repository={{ create: vi.fn(), update: vi.fn() }} />)
 
     fireEvent.click(screen.getByRole('button', { name: '5' }))
     fireEvent.click(screen.getByRole('button', { name: '下一步' }))
@@ -89,8 +106,8 @@ describe('EntryFlow', () => {
   })
 
   it('saves without an exerciseId when exercise selection is skipped', async () => {
-    const create = vi.fn().mockResolvedValue({ id: 'saved-entry' })
-    render(<EntryFlow repository={{ create }} />)
+    const create = vi.fn().mockResolvedValue({ id: 'saved-entry', createdAt: '2026-08-17T00:00:00.000Z' })
+    render(<EntryFlow repository={{ create, update: vi.fn() }} />)
 
     fireEvent.click(screen.getByRole('button', { name: '5' }))
     ;[1, 2, 3, 4, 5].forEach(() => fireEvent.click(screen.getByRole('button', { name: '跳过此步' })))
@@ -105,7 +122,7 @@ describe('EntryFlow', () => {
 
   it('shows a summary save error inline when repository.create fails', async () => {
     const create = vi.fn().mockRejectedValue(new Error('保存失败'))
-    render(<EntryFlow repository={{ create }} />)
+    render(<EntryFlow repository={{ create, update: vi.fn() }} />)
 
     fireEvent.click(screen.getByRole('button', { name: '5' }))
     ;[1, 2, 3, 4, 5, 6].forEach(() => fireEvent.click(screen.getByRole('button', { name: '跳过此步' })))
@@ -116,28 +133,31 @@ describe('EntryFlow', () => {
   })
 
   it('writes a completed exercise result into the same entry instead of creating another record', async () => {
-    const create = vi.fn().mockResolvedValue({ id: 'saved-entry' })
+    const create = vi.fn().mockResolvedValue({ id: 'saved-entry', createdAt: '2026-08-17T00:00:00.000Z' })
+    const update = vi.fn().mockResolvedValue(undefined)
     const onExerciseSelect = vi.fn()
-    const { rerender } = render(<EntryFlow repository={{ create }} onExerciseSelect={onExerciseSelect} />)
+    const { rerender } = render(<EntryFlow repository={{ create, update }} onExerciseSelect={onExerciseSelect} />)
 
     fireEvent.click(screen.getByRole('button', { name: '5' }))
-    ;[1, 2, 3, 4, 5].forEach(() => fireEvent.click(screen.getByRole('button', { name: '跳过此步' })))
+    ;[1, 2, 3, 4].forEach(() => fireEvent.click(screen.getByRole('button', { name: '跳过此步' })))
+    fireEvent.click(screen.getByRole('button', { name: '下一步' }))
+    await screen.findByRole('heading', { name: '选择练习（可选）' })
     fireEvent.click(screen.getAllByRole('button', { name: '开始' })[0])
     expect(onExerciseSelect).toHaveBeenCalledWith(exercises[0])
 
-    rerender(<EntryFlow repository={{ create }} onExerciseSelect={onExerciseSelect} exerciseResult={{ exerciseId: exercises[0].id, durationMinutes: 5, intensityAfter: 3 }} />)
+    rerender(<EntryFlow repository={{ create, update }} onExerciseSelect={onExerciseSelect} exerciseResult={{ exerciseId: exercises[0].id, durationMinutes: 5, intensityAfter: 3 }} />)
     fireEvent.click(screen.getByRole('button', { name: '下一步' }))
     fireEvent.click(screen.getByRole('button', { name: '保存记录' }))
     await screen.findByText('记录已保存')
 
     expect(create).toHaveBeenCalledTimes(1)
-    expect(create).toHaveBeenCalledWith(expect.objectContaining({ exerciseId: exercises[0].id, durationMinutes: 5, intensityAfter: 3 }))
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ exerciseId: exercises[0].id, durationMinutes: 5, intensityAfter: 3 }))
   })
 
   it('allows saving without blocking when pressure is 9 or 10', async () => {
     for (const intensity of [9, 10]) {
       const create = vi.fn().mockResolvedValue({ id: `saved-${intensity}` })
-      render(<EntryFlow repository={{ create }} />)
+      render(<EntryFlow repository={{ create, update: vi.fn() }} />)
       fireEvent.click(screen.getByRole('button', { name: String(intensity) }))
       expect(screen.getByText('压力很高，但你仍然可以按自己的节奏记录。')).toBeInTheDocument()
       fireEvent.click(screen.getByRole('button', { name: '保存' }))
