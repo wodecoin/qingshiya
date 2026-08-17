@@ -45,3 +45,18 @@ Follow-up 实际验证：
 Follow-up concerns：
 
 - 未运行 Playwright E2E；按本次要求执行了全量 Vitest 和 production build。
+
+## Remaining Review Fix
+
+- App 在练习退出时通过 `exerciseExitVersion` 通知 EntryFlow，明确清除未完成练习的 `exerciseId`、`durationMinutes` 和 `intensityAfter`。
+- 退出只清除练习相关字段，原始压力强度和四层情绪字段保持不变。
+- 新增真实 App 集成测试，覆盖填写练习后强度、启动练习、退出并保存后的字段结果。
+
+实际验证：
+
+- `npm test -- --run`：7 个测试文件通过，37 个测试通过，0 失败。
+- `npm run build`：`tsc -b` 和 Vite production build 通过，退出码 0。
+
+Concerns：
+
+- 未运行 Playwright E2E；本次按要求执行了全量 Vitest 和 production build。

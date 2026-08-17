@@ -15,12 +15,13 @@ interface EntryFlowProps {
   onSaved?: () => void
   onExerciseSelect?: (exercise: Exercise) => void
   exerciseResult?: ExerciseResult
+  exerciseExitVersion?: number
 }
 
 const steps = ['intensity', 'primary', 'secondary', 'body', 'behavior', 'exercise'] as const
 type Step = typeof steps[number]
 
-export function EntryFlow({ repository = entriesRepository, onSaved, onExerciseSelect, exerciseResult }: EntryFlowProps) {
+export function EntryFlow({ repository = entriesRepository, onSaved, onExerciseSelect, exerciseResult, exerciseExitVersion }: EntryFlowProps) {
   const [stepIndex, setStepIndex] = useState(0)
   const [form, setForm] = useState<EntryFormState>(initialEntryForm)
   const [saving, setSaving] = useState(false)
@@ -32,6 +33,10 @@ export function EntryFlow({ repository = entriesRepository, onSaved, onExerciseS
   useEffect(() => {
     if (exerciseResult) update({ exerciseId: exerciseResult.exerciseId, durationMinutes: exerciseResult.durationMinutes, intensityAfter: exerciseResult.intensityAfter })
   }, [exerciseResult])
+
+  useEffect(() => {
+    if (exerciseExitVersion) update({ exerciseId: undefined, durationMinutes: undefined, intensityAfter: undefined })
+  }, [exerciseExitVersion])
 
   function update(change: Partial<EntryFormState>) { setForm((current) => ({ ...current, ...change })) }
 

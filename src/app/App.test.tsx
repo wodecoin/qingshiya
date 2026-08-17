@@ -80,6 +80,29 @@ describe('App', () => {
     expect(entries[0].durationMinutes).toBeUndefined()
   })
 
+  it('clears a prefilled post-exercise intensity when exiting an unfinished exercise', async () => {
+    render(<App />)
+    fireEvent.click(await screen.findByRole('button', { name: '跳过' }))
+    fireEvent.click(await screen.findByRole('button', { name: '记录一次压力' }))
+    fireEvent.click(screen.getByRole('button', { name: '5' }))
+    fireEvent.click(screen.getByRole('button', { name: '下一步' }))
+    fireEvent.click(screen.getByRole('button', { name: '焦虑' }))
+    fireEvent.click(screen.getByRole('button', { name: '下一步' }))
+    ;[1, 2, 3].forEach(() => fireEvent.click(screen.getByRole('button', { name: '跳过此步' })))
+    fireEvent.change(screen.getByRole('spinbutton', { name: '练习后压力强度' }), { target: { value: '3' } })
+    fireEvent.click(screen.getAllByRole('button', { name: '开始' })[0])
+    fireEvent.click(screen.getByRole('button', { name: '退出' }))
+    fireEvent.click(screen.getByRole('button', { name: '下一步' }))
+    fireEvent.click(screen.getByRole('button', { name: '保存记录' }))
+
+    await waitFor(async () => expect(await entriesRepository.list()).toHaveLength(1))
+    const [entry] = await entriesRepository.list()
+    expect(entry).toMatchObject({ intensityBefore: 5, primaryEmotions: ['焦虑'] })
+    expect(entry.exerciseId).toBeUndefined()
+    expect(entry.durationMinutes).toBeUndefined()
+    expect(entry.intensityAfter).toBeUndefined()
+  })
+
   it('clears the runner and result when leaving and re-entering the entry flow', async () => {
     render(<App />)
     fireEvent.click(await screen.findByRole('button', { name: '跳过' }))

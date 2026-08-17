@@ -14,6 +14,7 @@ export function App() {
   const [page, setPage] = useState<AppPage>('home')
   const [activeExercise, setActiveExercise] = useState<Exercise>()
   const [exerciseResult, setExerciseResult] = useState<{ exerciseId: string; durationMinutes: number; intensityAfter?: number }>()
+  const [exerciseExitVersion, setExerciseExitVersion] = useState(0)
   const [refreshToken, setRefreshToken] = useState(0)
   const [onboarding, setOnboarding] = useState<'loading' | 'shown' | 'done'>('loading')
   useEffect(() => { void settingsRepository.get().then((settings) => setOnboarding(settings.onboardingCompleted ? 'done' : 'shown')).catch(() => setOnboarding('done')) }, [])
@@ -21,24 +22,27 @@ export function App() {
   function leaveEntry() {
     setActiveExercise(undefined)
     setExerciseResult(undefined)
+    setExerciseExitVersion((value) => value + 1)
     setPage('home')
   }
   function startEntry() {
     setActiveExercise(undefined)
     setExerciseResult(undefined)
+    setExerciseExitVersion((value) => value + 1)
     setPage('entry')
   }
   const navigate = (nextPage: AppPage) => (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault()
     setActiveExercise(undefined)
     setExerciseResult(undefined)
+    setExerciseExitVersion((value) => value + 1)
     setPage(nextPage)
   }
 
   return (
     <div className="app-shell">
       {page === 'home' && <HomePage key={refreshToken} onRecord={startEntry} onReview={() => setPage('review')} onExercises={() => setPage('exercises')} onSettings={() => setPage('settings')} />}
-      {page === 'entry' && <main className="app-content"><button type="button" className="text-action" onClick={leaveEntry}>返回首页</button><div hidden={Boolean(activeExercise)}><EntryFlow exerciseResult={exerciseResult} onSaved={leaveEntry} onExerciseSelect={(exercise) => { setExerciseResult(undefined); setActiveExercise(exercise) }} /></div>{activeExercise && <ExerciseRunner exercise={activeExercise} onExit={() => setActiveExercise(undefined)} onComplete={(result) => { setExerciseResult({ exerciseId: activeExercise.id, ...result }); setActiveExercise(undefined) }} />}</main>}
+      {page === 'entry' && <main className="app-content"><button type="button" className="text-action" onClick={leaveEntry}>返回首页</button><div hidden={Boolean(activeExercise)}><EntryFlow exerciseExitVersion={exerciseExitVersion} exerciseResult={exerciseResult} onSaved={leaveEntry} onExerciseSelect={(exercise) => { setExerciseResult(undefined); setActiveExercise(exercise) }} /></div>{activeExercise && <ExerciseRunner exercise={activeExercise} onExit={() => { setActiveExercise(undefined); setExerciseResult(undefined); setExerciseExitVersion((value) => value + 1) }} onComplete={(result) => { setExerciseResult({ exerciseId: activeExercise.id, ...result }); setActiveExercise(undefined) }} />}</main>}
       {page === 'exercises' && <main className="app-content">{activeExercise ? <ExerciseRunner exercise={activeExercise} onExit={() => setActiveExercise(undefined)} onComplete={() => setActiveExercise(undefined)} /> : <ExerciseLibrary onSelect={setActiveExercise} />}</main>}
       {page === 'review' && <ReviewPage key={refreshToken} onBack={() => setPage('home')} />}
       {page === 'settings' && <SettingsPage onCleared={() => setRefreshToken((value) => value + 1)} />}
